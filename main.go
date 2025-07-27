@@ -18,17 +18,19 @@ func main() {
 		w.Write([]byte("{\"code\": 404, \"message\": \"Not Found\"}"))
 	})
 
+	// Endpoint principali
 	r.HandleFunc("/v0/pdfgen/fromhtml", controller.FromHtml).Methods("POST")
+	r.HandleFunc("/v0/pdfgen/fromhtml-multipart", controller.FromHtmlMultipart).Methods("POST")
 
-	// Health
+	// Health check
 	r.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("ok")) }).Methods("GET")
 	r.HandleFunc("/readiness", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("ok")) }).Methods("GET")
 
-	// Negroni
+	// Middleware Negroni
 	n := negroni.New()
 	n.Use(negroni.NewRecovery())
 	n.Use(negroni.NewLogger())
-	n.UseHandler(r) // cors.New() rimosso
+	n.UseHandler(r)
 
 	port := config.Get("PORT")
 	if port == "" {

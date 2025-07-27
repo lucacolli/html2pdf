@@ -1,6 +1,6 @@
 # html2pdf
 
-Un servizio REST scritto in Go che converte documenti HTML in PDF utilizzando `wkhtmltopdf`.
+Un servizio REST scritto in Go che converte documenti HTML in PDF utilizzando `weasyprint`.
 
 ## Build con Docker
 
@@ -24,20 +24,34 @@ Il servizio sarà disponibile su:
 http://localhost:7979
 ```
 
+---
+
 ## Endpoint API
 
-### **POST /html2pdf/v0/convert**
+### **POST /v0/pdfgen/fromhtml**
 
-Converte un documento HTML in PDF.
+Accetta un JSON con un campo `html` contenente il documento HTML in **base64**.
 
 **Esempio con `curl`:**
 
 ```bash
-curl -X POST http://localhost:7979/html2pdf/v0/convert   -F "file=@./document.html"   -o output.pdf
+b64=$(base64 -w0 document.html)   # su macOS: base64 document.html | tr -d '\n'
+curl -X POST http://localhost:7979/v0/pdfgen/fromhtml   -H "Content-Type: application/json"   -d "{\"html\":\"$b64\"}"   -o output.pdf
 ```
 
-- `file`: il file HTML da convertire.
-- L'output PDF viene salvato come `output.pdf`.
+---
+
+### **POST /v0/pdfgen/fromhtml-multipart**
+
+Accetta un form-data con il file HTML (`file`).
+
+**Esempio con `curl`:**
+
+```bash
+curl -X POST http://localhost:7979/v0/pdfgen/fromhtml-multipart   -F "file=@./document.html"   -o output.pdf
+```
+
+---
 
 ## Build locale (senza Docker)
 
@@ -48,14 +62,16 @@ go build -o htmltopdf main.go
 ./htmltopdf
 ```
 
+---
+
 ## Dipendenze principali
 
 - [Go](https://go.dev/)
-- [wkhtmltopdf](https://wkhtmltopdf.org/)
+- [weasyprint](https://weasyprint.org/)
 
 ---
 
 ## Note
 
-- Assicurati che `wkhtmltopdf` sia installato e disponibile nel container o nel tuo ambiente locale.
+- Assicurati che `weasyprint` sia installato e disponibile nel container o nel tuo ambiente locale.
 - La porta predefinita è **7979**, ma può essere sovrascritta tramite la variabile d’ambiente `PORT`.
